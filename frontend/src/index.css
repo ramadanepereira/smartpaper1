@@ -1,0 +1,97 @@
+/* ── Reset básico ──
+ * Remove margens/paddings padrão e define box-sizing consistente. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── Estilos globais ──
+ * Fonte Inter (fallback sans-serif), cores base modo claro.
+ * darkMode é aplicado via inline styles nos componentes. */
+body { 
+  font-family: 'Inter', sans-serif; 
+  background: #F1F5F9; 
+  color: #1E293B; 
+}
+
+/* ── Inputs, selects e textarea herdam a fonte ── */
+input, select, textarea, button { font-family: inherit; }
+
+/* ── Scrollbar personalizada (Webkit) ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 3px; }
+
+/* ── Responsividade: tabelas em ecrãs pequenos ──
+ * .table-responsive: wrap com overflow-x auto para tabelas largas.
+ * .hide-mobile: oculta elementos em < 768px.
+ * .stack-mobile: força flex-direction column em < 768px. */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hide-mobile {
+    display: none !important;
+  }
+  .stack-mobile {
+    flex-direction: column !important;
+  }
+}
+
+/* ── KPI cards adaptáveis ──
+ * Grid responsivo que ajusta colunas conforme espaço disponível. */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+/* ── Animação de fade-in ──
+ * Aplicada a <main> via className="fade-in" para transição suave entre páginas. */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* ── Container responsivo ── */
+.responsive-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (max-width: 640px) {
+  .responsive-container {
+    padding: 0 10px;
+  }
+}
+
+/* ── Botão full-width em mobile ── */
+@media (max-width: 768px) {
+  .btn-full-mobile {
+    width: 100% !important;
+  }
+}
+
+/* ── Esconder em ecrãs muito pequenos (< 480px) ── */
+@media (max-width: 480px) {
+  .hide-xs {
+    display: none !important;
+  }
+}
+
+/* ── Grid auto-fit reutilizável ── */
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
