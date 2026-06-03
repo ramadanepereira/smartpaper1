@@ -67,27 +67,35 @@ router.post('/', async (req, res) => {
   for (const item of itens) {
     total += (item.quantidade || 1) * (item.preco_unit || 0);
   }
-  const insertPedidoSQL = 'INSERT INTO pedidos (numero, cliente_id, nome_cliente, total, observacoes, criado_por) VALUES (?, ?, ?, ?, ?, ?)';
-  const insertItemSQL = 'INSERT INTO pedido_itens (pedido_id, servico_id, nome, quantidade, preco_unit, subtotal) VALUES (?, ?, ?, ?, ?, ?)';
-  const trx = db.transaction((cliente_id, nome_cliente, total, observacoes, criado_por) => {
-    const result = db.run(insertPedidoSQL, [numero, cliente_id, nome_cliente, total, observacoes, criado_por]);
+  try {
+    await db.run('BEGIN');
+    const result = await db.run(
+      'INSERT INTO pedidos (numero, cliente_id, nome_cliente, total, observacoes, criado_por) VALUES (?, ?, ?, ?, ?, ?)',
+      [numero, cliente_id || null, nome_cliente || null, total, observacoes || null, req.utilizador.id]
+    );
     const pedidoId = result.lastInsertRowid;
     for (const item of itens) {
       const subtotal = (item.quantidade || 1) * (item.preco_unit || 0);
-      db.run(insertItemSQL, [pedidoId, item.servico_id || null, item.nome, item.quantidade || 1, item.preco_unit || 0, subtotal]);
+      await db.run(
+        'INSERT INTO pedido_itens (pedido_id, servico_id, nome, quantidade, preco_unit, subtotal) VALUES (?, ?, ?, ?, ?, ?)',
+        [pedidoId, item.servico_id || null, item.nome, item.quantidade || 1, item.preco_unit || 0, subtotal]
+      );
     }
-    return pedidoId;
-  });
-  const pedidoId = trx(cliente_id || null, nome_cliente || null, total, observacoes || null, req.utilizador.id);
-  const pedido = await db.get('SELECT * FROM pedidos WHERE id = ?', [pedidoId]);
+    await db.run('COMMIT');
+    const pedido = await db.get('SELECT * FROM pedidos WHERE id = ?', [pedidoId]);
 
-  logAtividade({
-    tipo: 'criacao', entidade: 'pedido', entidade_id: pedidoId,
-    descricao: `Pedido ${pedido.numero} foi criado (${total.toLocaleString()} MT)`,
-    utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
-  });
+    await logAtividade({
+      tipo: 'criacao', entidade: 'pedido', entidade_id: pedidoId,
+      descricao: `Pedido ${pedido.numero} foi criado (${total.toLocaleString()} MT)`,
+      utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
+    });
 
-  res.status(201).json(pedido);
+    res.status(201).json(pedido);
+  } catch (err) {
+    await db.run('ROLLBACK');
+    console.error('Erro ao criar pedido:', err);
+    res.status(500).json({ erro: 'Erro ao criar pedido' });
+  }
 });
 
 // --- PUT /:id/status : Atualizar status ---
@@ -101,7 +109,7 @@ router.put('/:id/status', async (req, res) => {
   await db.run("UPDATE pedidos SET status = ?, atualizado_em = datetime('now','localtime') WHERE id = ?", [status, req.params.id]);
   const pedido = await db.get('SELECT * FROM pedidos WHERE id = ?', [req.params.id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'mudanca_status', entidade: 'pedido', entidade_id: pedido.id,
     descricao: `Pedido ${pedido.numero} mudou para "${status.replace('_', ' ')}"`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -118,7 +126,7 @@ router.put('/:id/observacoes', async (req, res) => {
   const pedidoObs = await db.get('SELECT numero FROM pedidos WHERE id = ?', [req.params.id]);
   await db.run("UPDATE pedidos SET observacoes = ?, atualizado_em = datetime('now','localtime') WHERE id = ?", [observacoes || null, req.params.id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'atualizacao', entidade: 'pedido', entidade_id: req.params.id,
     descricao: `Observações do pedido ${pedidoObs.numero} foram actualizadas`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -134,7 +142,7 @@ router.delete('/:id', async (req, res) => {
   const pedidoDel = await db.get('SELECT numero FROM pedidos WHERE id = ?', [req.params.id]);
   await db.run("UPDATE pedidos SET status = 'cancelado', atualizado_em = datetime('now','localtime') WHERE id = ?", [req.params.id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'eliminacao', entidade: 'pedido', entidade_id: req.params.id,
     descricao: `Pedido ${pedidoDel.numero} foi cancelado`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,

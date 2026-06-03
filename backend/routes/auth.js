@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '8h' }
     );
 
-    logAtividade({
+    await logAtividade({
       tipo: 'login', entidade: 'utilizador', entidade_id: utilizador.id,
       descricao: `Login realizado por ${utilizador.nome} (${utilizador.perfil})`,
       utilizador_id: utilizador.id, utilizado_nome: utilizador.nome,

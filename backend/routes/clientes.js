@@ -37,7 +37,7 @@ router.post('/', async (req, res) => {
   );
   const cliente = await db.get('SELECT * FROM clientes WHERE id = ?', [result.lastInsertRowid]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'criacao', entidade: 'cliente', entidade_id: cliente.id,
     descricao: `Cliente "${cliente.nome}" foi cadastrado`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -58,7 +58,7 @@ router.put('/:id', async (req, res) => {
   );
   const cliente = await db.get('SELECT * FROM clientes WHERE id = ?', [req.params.id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'atualizacao', entidade: 'cliente', entidade_id: cliente.id,
     descricao: `Dados do cliente "${before.nome}" foram actualizados`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -73,7 +73,7 @@ router.delete('/:id', async (req, res) => {
   if (!existing) return res.status(404).json({ erro: 'Cliente não encontrado' });
   await db.run('UPDATE clientes SET ativo = 0 WHERE id = ?', [req.params.id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'eliminacao', entidade: 'cliente', entidade_id: existing.id,
     descricao: `Cliente "${existing.nome}" foi removido`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,

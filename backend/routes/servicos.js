@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
   );
   const servico = await db.get('SELECT * FROM servicos WHERE id = ?', [result.lastInsertRowid]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'criacao', entidade: 'servico', entidade_id: servico.id,
     descricao: `Serviço "${servico.nome}" foi criado (${Number(servico.preco).toLocaleString()} MT)`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -60,7 +60,7 @@ router.put('/:id', async (req, res) => {
   );
   const servico = await db.get('SELECT * FROM servicos WHERE id = ?', [req.params.id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'atualizacao', entidade: 'servico', entidade_id: servico.id,
     descricao: `Serviço "${before.nome}" foi actualizado`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -75,7 +75,7 @@ router.delete('/:id', async (req, res) => {
   if (!existing) return res.status(404).json({ erro: 'Serviço não encontrado' });
   await db.run('UPDATE servicos SET ativo = 0 WHERE id = ?', [req.params.id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'eliminacao', entidade: 'servico', entidade_id: existing.id,
     descricao: `Serviço "${existing.nome}" foi removido`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,

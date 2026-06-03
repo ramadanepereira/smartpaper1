@@ -39,11 +39,11 @@ router.post('/', async (req, res) => {
     if (!nome || !username || !password) return res.status(400).json({ erro: 'Nome, username e password são obrigatórios' });
     const existente = await db.get('SELECT id FROM utilizadores WHERE username = ?', [username]);
     if (existente) return res.status(400).json({ erro: 'Username já está em uso' });
-    const hash = bcrypt.hashSync(password, 10);
+    const hash = await bcrypt.hash(password, 10);
     const result = await db.run('INSERT INTO utilizadores (nome, username, password, perfil) VALUES (?, ?, ?, ?)', [nome, username, hash, perfil || 'operador']);
     const u = await db.get('SELECT id, nome, username, perfil, ativo, criado_em FROM utilizadores WHERE id = ?', [result.lastInsertRowid]);
 
-    logAtividade({
+    await logAtividade({
       tipo: 'criacao', entidade: 'utilizador', entidade_id: u.id,
       descricao: `Utilizador "${u.nome}" (${u.perfil}) foi criado`,
       utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -69,7 +69,7 @@ router.put('/:id', async (req, res) => {
     const params = [nome, username];
     if (password) {
       sql += ', password = ?';
-      params.push(bcrypt.hashSync(password, 10));
+      params.push(await bcrypt.hash(password, 10));
     }
     if (perfil) {
       sql += ', perfil = ?';
@@ -80,7 +80,7 @@ router.put('/:id', async (req, res) => {
     await db.run(sql, params);
     const u = await db.get('SELECT id, nome, username, perfil, ativo, criado_em FROM utilizadores WHERE id = ?', [req.params.id]);
 
-    logAtividade({
+    await logAtividade({
       tipo: 'atualizacao', entidade: 'utilizador', entidade_id: u.id,
       descricao: `Utilizador "${u.nome}" foi actualizado`,
       utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -100,7 +100,7 @@ router.put('/:id/perfil', async (req, res) => {
     const novoPerfil = existing.perfil === 'admin' ? 'operador' : 'admin';
     await db.run('UPDATE utilizadores SET perfil = ? WHERE id = ?', [novoPerfil, req.params.id]);
 
-    logAtividade({
+    await logAtividade({
       tipo: 'atualizacao', entidade: 'utilizador', entidade_id: req.params.id,
       descricao: `Perfil do utilizador "${existing.nome}" alterado para ${novoPerfil}`,
       utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,
@@ -121,7 +121,7 @@ router.put('/:id/ativo', async (req, res) => {
     const novoAtivo = existing.ativo ? 0 : 1;
     await db.run('UPDATE utilizadores SET ativo = ? WHERE id = ?', [novoAtivo, req.params.id]);
 
-    logAtividade({
+    await logAtividade({
       tipo: 'atualizacao', entidade: 'utilizador', entidade_id: req.params.id,
       descricao: `Utilizador "${nomeUser}" foi ${novoAtivo ? 'activado' : 'desactivado'}`,
       utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,

@@ -71,7 +71,7 @@ router.post('/', async (req, res) => {
   const pagamento = await db.get('SELECT * FROM pagamentos WHERE id = ?', [result.lastInsertRowid]);
   const pedidoPag = await db.get('SELECT numero FROM pedidos WHERE id = ?', [pedido_id]);
 
-  logAtividade({
+  await logAtividade({
     tipo: 'criacao', entidade: 'pagamento', entidade_id: pagamento.id,
     descricao: `Pagamento de ${parseFloat(valor).toLocaleString()} MT (${metodo}) registado para o pedido ${pedidoPag.numero}`,
     utilizador_id: req.utilizador.id, utilizado_nome: req.utilizador.nome,

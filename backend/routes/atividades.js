@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/teste', async (req, res) => {
   try {
-    logAtividade({
+    await logAtividade({
       tipo: 'teste', entidade: 'sistema', entidade_id: null,
       descricao: 'Teste de logging - endpoint de diagnóstico',
       utilizador_id: req.utilizador?.id, utilizado_nome: req.utilizador?.nome,

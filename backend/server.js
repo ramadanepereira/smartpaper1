@@ -138,11 +138,11 @@ app.get('/api/health', (req, res) => {
 });
 
 /* ── Diagnóstico rápido de logging (público) ── */
-app.get('/api/diag-log', (req, res) => {
+app.get('/api/diag-log', async (req, res) => {
   try {
     const d = require('./database');
     const { logAtividade: log } = require('./logging');
-    log({
+    await log({
       tipo: 'teste', entidade: 'sistema', entidade_id: 0,
       descricao: `Teste diagnóstico - ${new Date().toISOString()}`,
       utilizador_id: 0, utilizado_nome: 'Diagnóstico',
