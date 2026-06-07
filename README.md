@@ -5,7 +5,6 @@ Sistema web completo para gestão de pedidos, clientes, serviços, pagamentos, t
 ## 📋 Índice
 
 - [Pré-requisitos](#pré-requisitos)
-- [Estrutura do Projecto](#estrutura-do-projecto)
 - [Execução Local (Desenvolvimento)](#execução-local-desenvolvimento)
 - [Deploy em Produção](#deploy-em-produção)
 - [Credenciais](#credenciais)
@@ -19,41 +18,6 @@ Sistema web completo para gestão de pedidos, clientes, serviços, pagamentos, t
 - **npm** v10 ou superior
 - **Git**
 - Contas gratuitas em: [GitHub](https://github.com), [Railway](https://railway.app), [Vercel](https://vercel.com), [Neon](https://neon.tech)
-
----
-
-## Estrutura do Projecto
-
-```
-smartpaper/
-├── backend/                    # API REST (Express 5)
-│   ├── server.js               # Servidor principal
-│   ├── database.js             # Abstracção SQLite/PostgreSQL
-│   ├── logging.js              # Registo de auditoria
-│   ├── middleware/auth.js      # Autenticação JWT
-│   ├── routes/                 # Rotas da API
-│   │   ├── auth.js
-│   │   ├── clientes.js
-│   │   ├── servicos.js
-│   │   ├── pedidos.js
-│   │   ├── pagamentos.js
-│   │   ├── tarefas.js
-│   │   ├── relatorios.js
-│   │   ├── atividades.js
-│   │   └── utilizadores.js
-│   └── package.json
-├── frontend/                   # Interface React (Vite)
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── context/AuthContext.jsx
-│   │   ├── components/         # Sidebar, Topbar
-│   │   ├── pages/              # 11 páginas
-│   │   └── utils/              # helpers, gerarRecibo
-│   ├── vercel.json
-│   └── package.json
-├── README.md
-└── .gitignore
-```
 
 ---
 
